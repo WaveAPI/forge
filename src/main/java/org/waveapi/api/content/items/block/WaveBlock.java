@@ -1,14 +1,10 @@
 package org.waveapi.api.content.items.block;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.ArmorItem;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.items.WaveItem;
@@ -41,7 +37,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
+import java.util.*;
 
 import static org.waveapi.Main.bake;
 
@@ -49,9 +45,13 @@ public class WaveBlock extends WaveItem {
     public Block block;
     private AbstractBlock.Settings blockSettings;
 
+    public static LinkedList<WaveBlock> blocks = new LinkedList<>();
+    public static Map<String,BlockEntityType<?>> blockEntities = new HashMap<>();
+
+
     public WaveBlock(String id, WaveMod mod, BlockMaterial material) {
         super(id, mod);
-        this.blockSettings = FabricBlockSettings.of(material.mat);
+        this.blockSettings = AbstractBlock.Settings.of(material.mat);
     }
 
     public WaveBlock(String id, WaveMod mod) {
@@ -87,7 +87,8 @@ public class WaveBlock extends WaveItem {
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        block = Registry.register(Registries.BLOCK, new Identifier(mod.name, id), bl);
+        block = bl;
+        blocks.add(this);
         if (this instanceof TileEntityBlock) {
             try {
                 Field type = block.getClass().getField("tileType");
@@ -107,19 +108,17 @@ public class WaveBlock extends WaveItem {
                         , Main.bake);
                 entityType.set(block, tile);
 
-                BlockEntityType<BlockEntity> entity = Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(mod.name, id + "_tile"),
-                        FabricBlockEntityTypeBuilder.create(
-                                (pos, state) -> {
-                                    try {
-                                        TileEntityCreation creation = new TileEntityCreation(tile, pos, state, (BlockEntityType) type.get(block));
-                                        return ((TileEntityBlock) this).getTileEntity().getConstructor(TileEntityCreation.class).newInstance (creation).blockEntity;
-                                    } catch (IllegalAccessException | InvocationTargetException |
-                                             InstantiationException | NoSuchMethodException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                                , block).build()
-                );
+                BlockEntityType<BlockEntity> entity = BlockEntityType.Builder.create((pos, state) -> {
+                    try {
+                        TileEntityCreation creation = new TileEntityCreation(tile, pos, state, (BlockEntityType) type.get(block));
+                        return ((TileEntityBlock) this).getTileEntity().getConstructor(TileEntityCreation.class).newInstance (creation).blockEntity;
+                    } catch (IllegalAccessException | InvocationTargetException |
+                             InstantiationException | NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    }
+                }, block).build(null);
+
+                blockEntities.put(mod.name + ":" + id, entity);
 
                 type.set(block, entity);
             } catch (NoSuchFieldException | IllegalAccessException e) {

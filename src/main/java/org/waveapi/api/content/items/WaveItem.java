@@ -2,9 +2,9 @@ package org.waveapi.api.content.items;
 
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.items.models.ItemModel;
@@ -43,7 +43,7 @@ public class WaveItem {
     }
 
     //<editor-fold desc="Item register code and constructors.">
-    protected static LinkedList<WaveItem> toRegister = new LinkedList<>();
+    public static LinkedList<WaveItem> toRegister = new LinkedList<>();
 
     public static void register() {
         Set<String> registered = new HashSet<>(toRegister.size());
@@ -58,11 +58,9 @@ public class WaveItem {
                 throw new RuntimeException("Caused by " + item.mod.name, e);
             }
         }
-        toRegister = null;
     }
 
     public void baseRegister() {
-        Item item;
         try {
             item = (Item) ClassHelper.LoadOrGenerateCompoundClass(this.mod.getClass().getPackageName() + "." + id + "$mcItem", new ClassHelper.Generator() {
                 @Override
@@ -79,9 +77,8 @@ public class WaveItem {
             throw new RuntimeException(e);
         }
 
-        this.item = Registry.register(Registries.ITEM, new Identifier(mod.name, id), item);
         if (tab != null) {
-            tab.items.add(item.getDefaultStack());
+            settings.group(tab.group);
         }
         settings = null;
     }
@@ -102,7 +99,7 @@ public class WaveItem {
     }
 
     public WaveItem(Item item) {
-        Identifier identifier = Registries.ITEM.getId(item);
+        Identifier identifier = Registry.ITEM.getId(item);
         this.id = identifier.getPath();
         this.mod = null; // todo: change to actual mod
         this.item = item;

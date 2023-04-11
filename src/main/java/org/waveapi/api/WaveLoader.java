@@ -1,6 +1,6 @@
 package org.waveapi.api;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraftforge.fml.ModList;
 import org.waveapi.Main;
 import org.waveapi.utils.ByteUtils;
 import org.waveapi.utils.Yaml;
@@ -46,9 +46,9 @@ public class WaveLoader {
 
         Map<String, Long> lastModified = new HashMap<>();
 
-        String version = FabricLoader.getInstance().getModContainer("waveapi").get().getMetadata().getVersion().toString();
+        String version = "0.0.5"; //Just hard code it in
 
-        modifiedCheck: if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        modifiedCheck: {
             try {
                 if (modified.isFile()) {
                     FileInputStream in = new FileInputStream(modified);

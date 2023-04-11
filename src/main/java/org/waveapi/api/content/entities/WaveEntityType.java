@@ -1,15 +1,21 @@
 package org.waveapi.api.content.entities;
 
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import io.netty.util.DefaultAttributeMap;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.DefaultAttributeRegistry;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegisterEvent;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.entities.renderer.WaveEntityRenderer;
@@ -20,41 +26,57 @@ import org.waveapi.api.world.entity.living.EntityLiving;
 import org.waveapi.content.entity.EntityHelper;
 import org.waveapi.utils.ClassHelper;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-public class WaveEntityType<T extends EntityBase> {
+public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
 
     private final WaveMod mod;
     public final Class<T> entity;
     public final Class<Entity> entityClass;
 
     private final String id;
-    private final FabricEntityTypeBuilder<Entity> preregister;
+    private final EntityType.Builder<Entity> preregister;
     public EntityType<? extends Entity> entityType;
     public EntityGroup type;
     public EntityBox box;
 
+    @SubscribeEvent
+    public static void entityAttributes(EntityAttributeCreationEvent event) {
+        for (Map.Entry<EntityType<? extends LivingEntity>, DefaultAttributeContainer> s : attributeContainerMap.entrySet()) {
+            event.put(s.getKey(), s.getValue());
+        }
+        attributeContainerMap = null;
+    }
+
+    @SubscribeEvent
+    public static void entityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        for (Map.Entry<EntityType<? extends Entity>, EntityRendererFactory<Entity>> s : entityRenderers.entrySet()){
+            event.registerEntityRenderer(s.getKey(), s.getValue());
+        }
+    }
+
+    public static Map<net.minecraft.entity.EntityType<? extends Entity>,
+    net.minecraft.client.render.entity.EntityRendererFactory<Entity>> entityRenderers = new HashMap<>();
+
+    public static Map<EntityType<? extends LivingEntity>, DefaultAttributeContainer> attributeContainerMap = new HashMap<>();
 
     private static LinkedList<WaveEntityType<?>> toRegister = new LinkedList<>();
 
-    public static void register() {
+    @SubscribeEvent
+    public static void register(RegisterEvent event) {
         for (WaveEntityType<?> t : toRegister) {
-            t.entityType = Registry.register(
-                    Registries.ENTITY_TYPE,
-                    new Identifier(t.mod.name, t.id),
-                    t.preregister.build()
-            );
+            t.entityType = t.preregister.build(t.mod.name + ":" + t.id);
 
             if (EntityLiving.class.isAssignableFrom(t.entity)) {
-                FabricDefaultAttributeRegistry.register((EntityType<? extends LivingEntity>) t.entityType,
-                        LivingEntity.createLivingAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10)
-                        );
+                attributeContainerMap.put((EntityType<? extends LivingEntity>) t.entityType, LivingEntity.createLivingAttributes().build());
             }
 
             if (Side.isClient()) {
                 t.getEntityRenderer().register(t);
-                EntityRendererRegistry.register(t.entityType, t.getEntityRenderer()::getRenderer);
+                entityRenderers.put(t.entityType, t.getEntityRenderer()::getRenderer);
             }
 
         }
@@ -74,7 +96,7 @@ public class WaveEntityType<T extends EntityBase> {
         this.type = group;
         this.box = box;
 
-        this.preregister = FabricEntityTypeBuilder.create(type.to()).entityFactory((type, world) -> EntityCreation.create(this, world).entity).dimensions(box.getDimensions());
+        this.preregister = EntityType.Builder.create(group.to()).setDimensions(box.getDimensions().width, box.getDimensions().height);
 
         entityClass = (Class<Entity>) ClassHelper.LoadOrGenerateCompoundClass(entity.getTypeName() + "$mcEntity", new ClassHelper.Generator() {
             @Override
@@ -92,7 +114,7 @@ public class WaveEntityType<T extends EntityBase> {
     }
 
     public void setMaxTrackingRange(int range) {
-        this.preregister.trackRangeBlocks(range);
+        this.preregister.setTrackingRange(range);
     }
 
     public WaveEntityType (String id, Class<T> entity, EntityBox box, WaveMod mod) {

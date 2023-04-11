@@ -1,14 +1,13 @@
 package org.waveapi.api.misc;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-
 public class Side {
+    public static boolean isServer;
+
     public static boolean isServer() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER;
+        return isServer;
     }
 
     public static boolean isClient() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+        return !isServer();
     }
 }

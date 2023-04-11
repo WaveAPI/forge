@@ -1,11 +1,17 @@
 package org.waveapi;
 
-import net.fabricmc.api.ModInitializer;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.util.Identifier;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.waveapi.api.WaveLoader;
 import org.waveapi.api.content.entities.WaveEntityType;
 import org.waveapi.api.content.items.WaveItem;
+import org.waveapi.api.content.items.block.WaveBlock;
 import org.waveapi.api.content.items.recipes.WaveShapedRecipe;
 import org.waveapi.api.misc.Side;
 import org.waveapi.content.entity.EntityHelper;
@@ -15,24 +21,31 @@ import org.waveapi.content.resources.TagHelper;
 import org.waveapi.utils.FileUtil;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class Main implements ModInitializer {
+@Mod("waveapi")
+
+public class Main {
 	public static final Logger LOGGER = LoggerFactory.getLogger("waveapi");
 
 	public static final File mainFolder = new File("./waveAPI");
 
 	public static boolean bake;
 
-	@Override
-	public void onInitialize() {
+
+	public Main() {
 
 		LOGGER.info("Initializing");
 		long initialTime = System.currentTimeMillis();
 
 		new ResourcePackManager();
+
+		try {
+			net.minecraft.client.MinecraftClient.getInstance();
+			Side.isServer = false;
+		} catch (Exception e) {
+			Side.isServer = true;
+		}
 
 		Set<String> loaded = new HashSet<>();
 
@@ -72,9 +85,7 @@ public class Main implements ModInitializer {
 
 		WaveShapedRecipe.build(new File(mainFolder, "resource_pack/data"));
 
-		WaveItem.register();
-
-		WaveEntityType.register();
+		//WaveEntityType.register();
 
 		TagHelper.write();
 
@@ -86,4 +97,27 @@ public class Main implements ModInitializer {
 
 		LOGGER.info("Initializing took " + (System.currentTimeMillis() - initialTime) + "ms");
 	}
+
+	@SubscribeEvent
+	public void register(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ITEMS, itemRegisterHelper -> {
+			for (WaveItem item : WaveItem.toRegister) {
+				itemRegisterHelper.register(new Identifier(item.getMod().name, item.getId()), item._getItem());
+			}
+			WaveItem.toRegister = null;
+		});
+		event.register(ForgeRegistries.Keys.BLOCKS, itemRegisterHelper -> {
+			for (WaveBlock item : WaveBlock.blocks) {
+				itemRegisterHelper.register(new Identifier(item.getMod().name, item.getId()), item.block);
+			}
+			WaveItem.toRegister = null;
+		});
+		event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, itemRegisterHelper -> {
+			for (Map.Entry<String, BlockEntityType<?>> item : WaveBlock.blockEntities.entrySet()) {
+				itemRegisterHelper.register(new Identifier(item.getKey()), item.getValue());
+			}
+			WaveBlock.blockEntities = null;
+		});
+	}
+
 }
