@@ -41,8 +41,9 @@ public class Main {
 	public Main() {
 		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-		modEventBus.addListener(this::init);
+		new ResourcePackManager();
 
+		modEventBus.addListener(this::init);
 	}
 
 	boolean inited = false;
@@ -53,8 +54,6 @@ public class Main {
 
 		LOGGER.info("Initializing");
 		long initialTime = System.currentTimeMillis();
-
-		new ResourcePackManager();
 
 		try {
 			net.minecraft.client.MinecraftClient.getInstance();
@@ -100,6 +99,7 @@ public class Main {
 		}
 
 		WaveItem.register();
+		WaveEntityType.register();
 
 		TagHelper.write();
 

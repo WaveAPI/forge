@@ -13,7 +13,9 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegisterEvent;
 import org.waveapi.Main;
@@ -31,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@Mod.EventBusSubscriber(modid = "waveapi", bus = Mod.EventBusSubscriber.Bus.MOD)
 public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
 
     private final WaveMod mod;
@@ -45,8 +48,8 @@ public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
 
     @SubscribeEvent
     public static void entityAttributes(EntityAttributeCreationEvent event) {
-        for (Map.Entry<EntityType<? extends LivingEntity>, DefaultAttributeContainer> s : attributeContainerMap.entrySet()) {
-            event.put(s.getKey(), s.getValue());
+        for (Map.Entry<EntityType<? extends LivingEntity>, WaveEntityType> s : attributeContainerMap.entrySet()) {
+            event.put(s.getKey(), LivingEntity.createLivingAttributes().build());
         }
         attributeContainerMap = null;
     }
@@ -61,18 +64,21 @@ public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
     public static Map<net.minecraft.entity.EntityType<? extends Entity>,
     net.minecraft.client.render.entity.EntityRendererFactory<Entity>> entityRenderers = new HashMap<>();
 
-    public static Map<EntityType<? extends LivingEntity>, DefaultAttributeContainer> attributeContainerMap = new HashMap<>();
+    public static Map<EntityType<? extends LivingEntity>, WaveEntityType> attributeContainerMap = new HashMap<>();
 
     private static LinkedList<WaveEntityType<?>> toRegister = new LinkedList<>();
 
-    @SubscribeEvent
-    public static void register(RegisterEvent event) {
+    public static IForgeRegistry<EntityType<?>> entityTypes = ForgeRegistries.ENTITY_TYPES;
+
+    public static void register() {
         for (WaveEntityType<?> t : toRegister) {
             t.entityType = t.preregister.build(t.mod.name + ":" + t.id);
 
             if (EntityLiving.class.isAssignableFrom(t.entity)) {
-                attributeContainerMap.put((EntityType<? extends LivingEntity>) t.entityType, LivingEntity.createLivingAttributes().build());
+                attributeContainerMap.put((EntityType<? extends LivingEntity>) t.entityType, t);
             }
+            entityTypes.register(new Identifier(t.mod.name, t.id), t.entityType);
+
 
             if (Side.isClient()) {
                 t.getEntityRenderer().register(t);
