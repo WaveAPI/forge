@@ -5,6 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.items.models.ItemModel;
@@ -45,6 +46,7 @@ public class WaveItem {
     //<editor-fold desc="Item register code and constructors.">
     public static LinkedList<WaveItem> toRegister = new LinkedList<>();
 
+
     public static void register() {
         Set<String> registered = new HashSet<>(toRegister.size());
         for (WaveItem item : toRegister) {
@@ -60,7 +62,11 @@ public class WaveItem {
         }
     }
 
+    private static final IForgeRegistry<Item> items = ForgeRegistries.ITEMS;
     public void baseRegister() {
+        if (tab != null) {
+            settings.group(tab.group);
+        }
         try {
             item = (Item) ClassHelper.LoadOrGenerateCompoundClass(this.mod.getClass().getPackageName() + "." + id + "$mcItem", new ClassHelper.Generator() {
                 @Override
@@ -73,13 +79,13 @@ public class WaveItem {
                     return new ArrayList<>();
                 }
             }, Main.bake).getConstructor(WaveItem.class).newInstance(this);
+
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
 
-        if (tab != null) {
-            settings.group(tab.group);
-        }
+        items.register(new Identifier(mod.name, id), item);
+
         settings = null;
     }
     

@@ -2,8 +2,13 @@ package org.waveapi;
 
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import org.slf4j.Logger;
@@ -34,6 +39,17 @@ public class Main {
 
 
 	public Main() {
+		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+		modEventBus.addListener(this::init);
+
+	}
+
+	boolean inited = false;
+	public void init(RegisterEvent event) {
+		if (inited) return;
+		inited = true;
+
 
 		LOGGER.info("Initializing");
 		long initialTime = System.currentTimeMillis();
@@ -83,9 +99,7 @@ public class Main {
 			}
 		}
 
-		WaveShapedRecipe.build(new File(mainFolder, "resource_pack/data"));
-
-		//WaveEntityType.register();
+		WaveItem.register();
 
 		TagHelper.write();
 
@@ -93,31 +107,11 @@ public class Main {
 			LangManager.write();
 		}
 
+		WaveShapedRecipe.build(new File(mainFolder, "resource_pack/data"));
+
 		EntityHelper.entityPossibleInterfaces = null;
 
 		LOGGER.info("Initializing took " + (System.currentTimeMillis() - initialTime) + "ms");
-	}
 
-	@SubscribeEvent
-	public void register(RegisterEvent event) {
-		event.register(ForgeRegistries.Keys.ITEMS, itemRegisterHelper -> {
-			for (WaveItem item : WaveItem.toRegister) {
-				itemRegisterHelper.register(new Identifier(item.getMod().name, item.getId()), item._getItem());
-			}
-			WaveItem.toRegister = null;
-		});
-		event.register(ForgeRegistries.Keys.BLOCKS, itemRegisterHelper -> {
-			for (WaveBlock item : WaveBlock.blocks) {
-				itemRegisterHelper.register(new Identifier(item.getMod().name, item.getId()), item.block);
-			}
-			WaveItem.toRegister = null;
-		});
-		event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, itemRegisterHelper -> {
-			for (Map.Entry<String, BlockEntityType<?>> item : WaveBlock.blockEntities.entrySet()) {
-				itemRegisterHelper.register(new Identifier(item.getKey()), item.getValue());
-			}
-			WaveBlock.blockEntities = null;
-		});
 	}
-
 }

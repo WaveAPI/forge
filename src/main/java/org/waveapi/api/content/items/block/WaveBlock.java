@@ -5,6 +5,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.items.WaveItem;
@@ -45,7 +49,6 @@ public class WaveBlock extends WaveItem {
     public Block block;
     private AbstractBlock.Settings blockSettings;
 
-    public static LinkedList<WaveBlock> blocks = new LinkedList<>();
     public static Map<String,BlockEntityType<?>> blockEntities = new HashMap<>();
 
 
@@ -66,6 +69,9 @@ public class WaveBlock extends WaveItem {
     public String[] _getBases() {
         return new String[] {CustomBlockWrap.class.getName()};
     }
+    private static final IForgeRegistry<Block> blocks = ForgeRegistries.BLOCKS;
+
+
     @Override
     public void _registerLocal() {
         Block bl;
@@ -88,7 +94,8 @@ public class WaveBlock extends WaveItem {
             throw new RuntimeException(e);
         }
         block = bl;
-        blocks.add(this);
+        blocks.register(new Identifier(mod.name, id), bl);
+
         if (this instanceof TileEntityBlock) {
             try {
                 Field type = block.getClass().getField("tileType");
