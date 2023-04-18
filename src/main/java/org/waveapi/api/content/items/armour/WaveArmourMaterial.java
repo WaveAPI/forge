@@ -1,7 +1,6 @@
 package org.waveapi.api.content.items.armour;
 
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;

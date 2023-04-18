@@ -1,14 +1,9 @@
 package org.waveapi.api.content.entities;
 
-import io.netty.util.DefaultAttributeMap;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.DefaultAttributeRegistry;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -16,8 +11,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegisterEvent;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.entities.renderer.WaveEntityRenderer;

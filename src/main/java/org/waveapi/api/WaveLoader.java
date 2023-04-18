@@ -1,6 +1,5 @@
 package org.waveapi.api;
 
-import net.minecraftforge.fml.ModList;
 import org.waveapi.Main;
 import org.waveapi.utils.ByteUtils;
 import org.waveapi.utils.Yaml;

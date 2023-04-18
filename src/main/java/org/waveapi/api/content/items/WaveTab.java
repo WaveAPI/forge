@@ -1,20 +1,11 @@
 package org.waveapi.api.content.items;
 
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.content.items.models.SimpleItemModel;
 import org.waveapi.api.misc.Side;
 import org.waveapi.content.resources.LangManager;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import static org.waveapi.Main.bake;
 
