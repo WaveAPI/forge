@@ -50,8 +50,10 @@ dependencies {
 	forge "net.minecraftforge:forge:${project.forge_version}"
 
 	modImplementation group: 'org.javassist', name: 'javassist', version: '3.29.2-GA'
+	modImplementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
 
 	inlcudeInJar group: 'org.javassist', name: 'javassist', version: '3.29.2-GA'
+	inlcudeInJar group: 'org.yaml', name: 'snakeyaml', version: '2.0'
 }
 
 sourceSets {

@@ -1,7 +1,11 @@
 package org.waveapi.api;
 
+import org.waveapi.Dependency;
 import org.waveapi.Main;
-import org.waveapi.utils.*;
+import org.waveapi.utils.ByteUtils;
+import org.waveapi.utils.DependencyResolver;
+import org.waveapi.utils.ErrorMessageBuilder;
+import org.waveapi.utils.KotlinCheck;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -82,7 +86,6 @@ public class WaveLoader {
                     FileInputStream in = new FileInputStream(modified);
 
                     if (!version.equals(ByteUtils.readString(in))) {
-                        ClassHelper.rebuild = true;
                         break modifiedCheck;
                     }
 
