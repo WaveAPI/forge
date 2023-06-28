@@ -8,22 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.waveapi.api.WaveLoader;
 import org.waveapi.api.entities.WaveEntityType;
+import org.waveapi.api.entities.entity._mc.EntityHelper;
 import org.waveapi.api.items.WaveItem;
 import org.waveapi.api.items.recipes.WaveShapedRecipe;
 import org.waveapi.api.misc.Side;
-import org.waveapi.content.entity.EntityHelper;
 import org.waveapi.content.resources.LangManager;
 import org.waveapi.content.resources.ResourcePackManager;
 import org.waveapi.content.resources.TagHelper;
 import org.waveapi.utils.FileUtil;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Mod("waveapi")
-
 public class Main {
 	public static final Logger LOGGER = LoggerFactory.getLogger("waveapi");
 
@@ -31,6 +28,7 @@ public class Main {
 
 	public static boolean bake;
 
+	public static List<Runnable> postInit = new LinkedList<>();
 
 	public Main() {
 		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -96,6 +94,10 @@ public class Main {
 		WaveEntityType.register();
 
 		TagHelper.write();
+
+		for (Runnable runnable : postInit) {
+			runnable.run();
+		}
 
 		if (Side.isClient()) {
 			LangManager.write();

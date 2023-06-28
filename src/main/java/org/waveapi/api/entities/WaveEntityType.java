@@ -14,10 +14,10 @@ import net.minecraftforge.registries.IForgeRegistry;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.entities.entity.EntityBase;
+import org.waveapi.api.entities.entity._mc.EntityHelper;
 import org.waveapi.api.entities.entity.living.EntityLiving;
 import org.waveapi.api.entities.renderer.WaveEntityRenderer;
 import org.waveapi.api.misc.Side;
-import org.waveapi.content.entity.EntityHelper;
 import org.waveapi.utils.ClassHelper;
 
 import java.util.HashMap;
@@ -96,7 +96,7 @@ public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
 
         this.preregister = EntityType.Builder.create(group.to()).setDimensions(box.getDimensions().width, box.getDimensions().height);
 
-        entityClass = (Class<Entity>) ClassHelper.LoadOrGenerateCompoundClass(entity.getTypeName() + "$mcEntity", new ClassHelper.Generator() {
+        entityClass = (Class<Entity>) ClassHelper.LoadOrGenerateCompoundClass(new ClassHelper.Generator() {
             @Override
             public String[] getBaseMethods() {
                 return EntityHelper.searchUpBase(entity);
@@ -106,7 +106,7 @@ public class WaveEntityType<T extends EntityBase> { // TODO: REWRITE THIS SHIT.
             public List<String> getInterfaces() {
                 return EntityHelper.searchUp(entity);
             }
-        }, Main.bake);
+        });
 
         toRegister.add(this);
     }

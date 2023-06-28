@@ -66,7 +66,13 @@ public class WaveItem {
             settings.group(tab.group);
         }
         try {
-            item = (Item) ClassHelper.LoadOrGenerateCompoundClass(this.mod.getClass().getPackageName() + "." + id + "$mcItem", new ClassHelper.Generator() {
+            item = (Item) ClassHelper.LoadOrGenerateCompoundClass(new ClassHelper.Generator() {
+
+                @Override
+                public String getName() {
+                    return base[0] + "$mc_class";
+                }
+
                 @Override
                 public String[] getBaseMethods() {
                     return base;
@@ -76,8 +82,7 @@ public class WaveItem {
                 public List<String> getInterfaces() {
                     return new ArrayList<>();
                 }
-            }, Main.bake).getConstructor(WaveItem.class).newInstance(this);
-
+            }).getConstructor(WaveItem.class).newInstance(this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
