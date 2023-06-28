@@ -20,6 +20,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
+        System.out.println(mixinPackage);
         if (mixinPackage.equals("org.waveapi.mixin")) {
             long initialTime = System.currentTimeMillis();
             Main.LOGGER.info("Preloading");

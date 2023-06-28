@@ -1,8 +1,9 @@
 package org.waveapi.api.items.enchantments;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.waveapi.Main;
 import org.waveapi.api.WaveMod;
 import org.waveapi.api.entities.entity.EntityBase;
@@ -30,9 +31,11 @@ public class WaveEnchantment {
     public boolean villagerTrade = false;
     public EnchantmentWrapper _mc;
 
+    private IForgeRegistry<Enchantment> register = ForgeRegistries.ENCHANTMENTS;
+
     public void _register () {
         this._mc = new EnchantmentWrapper(this);
-        Registry.register(Registries.ENCHANTMENT, new Identifier(mod.name, name), _mc);
+        register.register(new Identifier(mod.name, name), _mc);
     }
     public WaveEnchantment(String name, EnchantmentTarget target, WaveMod mod) {
         this.name = name;

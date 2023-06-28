@@ -2,10 +2,7 @@ package org.waveapi.api;
 
 import org.waveapi.Dependency;
 import org.waveapi.Main;
-import org.waveapi.utils.ByteUtils;
-import org.waveapi.utils.DependencyResolver;
-import org.waveapi.utils.ErrorMessageBuilder;
-import org.waveapi.utils.KotlinCheck;
+import org.waveapi.utils.*;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -62,7 +59,6 @@ public class WaveLoader {
     };
     public static Set<String> externalDeps = new HashSet<>();
     public static void init() {
-
         List<WrappedWaveMod> modList = new ArrayList<>();
 
         {
@@ -78,14 +74,14 @@ public class WaveLoader {
 
             Map<String, Long> lastModified = new HashMap<>();
 
-            String version = "0.3.1"; // hard code continues
+            String version = "0.3.1";
 
-            modifiedCheck:
-            try {
+            modifiedCheck: try {
                 if (modified.isFile()) {
                     FileInputStream in = new FileInputStream(modified);
 
                     if (!version.equals(ByteUtils.readString(in))) {
+                        ClassHelper.rebuild = true;
                         break modifiedCheck;
                     }
 
@@ -259,7 +255,7 @@ public class WaveLoader {
                     Main.LOGGER.error("Mod " + wrap.file.getName() + " has bad main path");
                 }
             } catch (Exception e) {
-                    throw new RuntimeException("Failed in pre-init of waveAPI mod [" + wrap.file.getName() + "]", e);
+                throw new RuntimeException("Failed in pre-init of waveAPI mod [" + wrap.file.getName() + "]", e);
             }
         }
 

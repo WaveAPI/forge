@@ -1,6 +1,7 @@
 plugins {
 	id "dev.architectury.loom" version "0.12.0-SNAPSHOT"
 	id "maven-publish"
+	id 'org.jetbrains.kotlin.jvm' version '1.8.21'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -22,26 +23,13 @@ loom {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
 	mavenLocal()
 	mavenCentral()
 }
 
 configurations {
-	inlcudeInJar
+	includeInJar
 }
-
-task generateSources(type: Copy) {
-	from {
-		configurations.inlcudeInJar.collect { it.name.contains("META-INF") ? null : it.isDirectory() ? it : zipTree(it) }
-	}
-	into "$buildDir/generated-src"
-}
-compileJava.dependsOn generateSources
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -49,26 +37,19 @@ dependencies {
 
 	forge "net.minecraftforge:forge:${project.forge_version}"
 
+	modImplementation group: 'org.yaml', name: 'snakeyaml', version: "2.0"
 	modImplementation group: 'org.javassist', name: 'javassist', version: '3.29.2-GA'
-	modImplementation group: 'org.yaml', name: 'snakeyaml', version: '2.0'
 
-	inlcudeInJar group: 'org.javassist', name: 'javassist', version: '3.29.2-GA'
-	inlcudeInJar group: 'org.yaml', name: 'snakeyaml', version: '2.0'
-}
+	includeInJar group: 'org.javassist', name: 'javassist', version: '3.29.2-GA'
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-sourceSets {
-	main {
-		resources {
-			srcDirs "$buildDir/generated-src"
-		}
-	}
+	includeInJar "org.yaml:snakeyaml:2.0"
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	// this will replace the property "${version}" in your mods.toml
-	// with the version you've defined in your gradle.properties
+
 	filesMatching("META-INF/mods.toml") {
 		expand "version": project.version
 	}
@@ -89,6 +70,9 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+	from {
+		configurations.includeInJar.collect { it.name.contains("META-INF") ? null : it.isDirectory() ? it : zipTree(it) }
+	}
 }
 
 // configure the maven publication
@@ -105,5 +89,15 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+	}
+}
+compileKotlin {
+	kotlinOptions {
+		jvmTarget = "1.8"
+	}
+}
+compileTestKotlin {
+	kotlinOptions {
+		jvmTarget = "1.8"
 	}
 }
